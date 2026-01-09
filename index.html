@@ -496,6 +496,11 @@
             const lowerMessage = userMessage.toLowerCase().trim();
             const normalized = normalizeMessage(userMessage);
             
+            // Egemen kontrolü - öncelikli
+            if (lowerMessage.includes('egemen') || normalized.includes('egemen')) {
+                return "Egemen kişisi bu yapay zekanın yapımcısındır ve 13 yaşındandır.";
+            }
+            
             // Önce matematik kontrolü
             const mathExpr = detectMathExpression(userMessage);
             if (mathExpr) {
@@ -505,7 +510,7 @@
                 }
             }
 
-            // Konu tespit et ve bilgi ver
+            // Konu tespit et ve bilgi ver - sadece bilgi tabanında varsa
             const topic = detectTopic(userMessage);
             if (topic && knowledgeBase[topic]) {
                 const responses = knowledgeBase[topic];
@@ -530,11 +535,7 @@
 
             // Havalar hakkında
             if (smartMatch(userMessage, ['hava', 'havalar', 'hava durumu', 'hava nasıl', 'havalar nasıl'])) {
-                const weatherFacts = [
-                    "Hava durumu hakkında gerçek zamanlı bilgi veremem ama size ilginç bir bilgi verebilirim: Dünya'da her saniye yaklaşık 100 yıldırım düşer! Yağmurlu günlerde kapalı alanlarda kalmak en güvenlisi.",
-                    "Hava durumu değişkenlik gösterebilir. Mevsim geçişlerinde hava sıcaklıkları hızla değişir, bu yüzden kat kat giyinmek iyi bir fikirdir. Hava durumu uygulamalarından güncel bilgi alabilirsiniz."
-                ];
-                return weatherFacts[Math.floor(Math.random() * weatherFacts.length)];
+                return "Hava durumu hakkında gerçek zamanlı bilgi veremem. Güncel hava durumu için hava durumu uygulamalarını veya meteoroloji sitelerini kullanabilirsiniz. Dünya'da her saniye yaklaşık 100 yıldırım düşer - bu doğrulanmış bir bilgidir.";
             }
 
             // Nasılsın
@@ -552,29 +553,17 @@
                 return "Size birçok konuda yardımcı olabilirim! Matematik işlemleri yapabilirim, teknoloji, bilim, spor, yemek gibi konularda bilgi verebilirim, sohbet edebilirim. Hangi konuda bilgi almak istersiniz?";
             }
 
-            // Soru sorma - detaylı cevaplar
+            // Soru sorma - kesin bilgiler
             if (smartMatch(userMessage, ['ne zaman'])) {
-                const timeFacts = [
-                    "Şu anki zamanı bilmiyorum ama size ilginç bir bilgi verebilirim: Bir yıl 365.25 gündür, bu yüzden her 4 yılda bir artık yıl olur. Saat dilimleri 1884'te standartlaştırıldı.",
-                    "Zaman göreceli bir kavramdır. Einstein'ın görelilik teorisine göre, hızlı hareket eden bir kişi için zaman daha yavaş geçer. GPS uyduları bu etkiyi hesaba katmak zorundadır!"
-                ];
-                return timeFacts[Math.floor(Math.random() * timeFacts.length)];
+                return "Şu anki zamanı bilmiyorum. Bir yıl 365.25 gündür, bu yüzden her 4 yılda bir artık yıl olur. Saat dilimleri 1884'te standartlaştırıldı. Güncel zamanı öğrenmek için saatinize bakabilirsiniz.";
             }
 
             if (smartMatch(userMessage, ['nasıl yapılır', 'nasıl yapabilirim', 'nasıl öğrenirim'])) {
-                const howToAnswers = [
-                    "Öğrenmek için adım adım ilerlemek önemlidir. Önce temel bilgileri öğrenin, sonra pratik yapın. Her gün biraz zaman ayırmak büyük fark yaratır. İnternette birçok ücretsiz kaynak var!",
-                    "Yeni bir şey öğrenmek için sabırlı olun ve hatalardan ders çıkarın. Pratik yapmak en iyi öğretmendir. Başkalarından yardım almak ve örnekleri incelemek de çok faydalıdır."
-                ];
-                return howToAnswers[Math.floor(Math.random() * howToAnswers.length)];
+                return "Öğrenmek için adım adım ilerlemek önemlidir. Önce temel bilgileri öğrenin, sonra pratik yapın. Her gün biraz zaman ayırmak büyük fark yaratır. İnternette birçok ücretsiz kaynak var. Hangi konuda öğrenmek istersiniz?";
             }
 
             if (smartMatch(userMessage, ['neden'])) {
-                const whyAnswers = [
-                    "Bu çok ilginç bir soru! Her şeyin bir nedeni vardır. Bilim, doğa olaylarını ve nedenlerini anlamamıza yardımcı olur. Merak etmek ve sorgulamak öğrenmenin temelidir.",
-                    "Neden sorusu bilimin başlangıcıdır. İnsanlar binlerce yıldır doğayı ve evreni anlamak için 'neden' sorusunu soruyor. Bu sorular sayesinde teknoloji ve bilim ilerliyor."
-                ];
-                return whyAnswers[Math.floor(Math.random() * whyAnswers.length)];
+                return "Bu ilginç bir soru! Her şeyin bir nedeni vardır. Bilim, doğa olaylarını ve nedenlerini anlamamıza yardımcı olur. Merak etmek ve sorgulamak öğrenmenin temelidir. Hangi konuda 'neden' sorusu soruyorsunuz?";
             }
 
             // Emoji veya kısa mesajlar
@@ -596,19 +585,14 @@
                 return "Görüşmek üzere! İyi günler dilerim, umarım gününüz güzel geçer!";
             }
 
-            // Rastgele konular için bilgi ver
-            if (lowerMessage.includes('rastgele') || lowerMessage.includes('ilginç') || lowerMessage.includes('bilgi')) {
+            // Rastgele konular için bilgi ver - sadece bilgi tabanındaki kesin bilgiler
+            if (lowerMessage.includes('rastgele') || lowerMessage.includes('ilginç') || lowerMessage.includes('bilgi ver')) {
                 const randomFacts = knowledgeBase['rastgele'];
                 return randomFacts[Math.floor(Math.random() * randomFacts.length)];
             }
 
-            // Varsayılan - her zaman bir cevap ver
-            const contextualResponses = [
-                "Bu konuda size bilgi verebilirim. " + knowledgeBase['rastgele'][Math.floor(Math.random() * knowledgeBase['rastgele'].length)],
-                "İlginç bir konu! " + knowledgeBase['rastgele'][Math.floor(Math.random() * knowledgeBase['rastgele'].length)],
-                "Size bu konuda yardımcı olabilirim. " + knowledgeBase['rastgele'][Math.floor(Math.random() * knowledgeBase['rastgele'].length)]
-            ];
-            return contextualResponses[Math.floor(Math.random() * contextualResponses.length)];
+            // Varsayılan - bilinmeyen konular için dürüst cevap (uydurma yok)
+            return "Bu konuda kesin bilgim yok. Size yardımcı olabileceğim konular: matematik işlemleri, teknoloji (bilgisayar, telefon, internet), bilim (uzay, dünya), hayvanlar (kedi, köpek), yemek, spor (futbol, basketbol) ve genel sohbet. Başka bir soru sorabilir misiniz?";
         }
 
         // Mesaj gönder
