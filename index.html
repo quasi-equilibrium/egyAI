@@ -110,6 +110,21 @@
             word-wrap: break-word;
             line-height: 1.5;
         }
+        
+        .message-content img {
+            max-width: 100%;
+            border-radius: 0.5rem;
+            margin-top: 0.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        .image-loading {
+            display: inline-block;
+            padding: 1rem;
+            background: rgba(74, 222, 128, 0.1);
+            border-radius: 0.5rem;
+            color: #4ade80;
+        }
 
         .message.user .message-content {
             background: rgba(233, 69, 96, 0.2);
@@ -539,6 +554,47 @@
             return null;
         }
 
+        // AI görsel oluşturma API'si
+        async function generateImage(prompt) {
+            try {
+                // Hugging Face Inference API - ücretsiz görsel oluşturma
+                const response = await fetch('https://api-inference.huggingface.co/models/runwayml/stable-diffusion-v1-5', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        inputs: prompt
+                    })
+                });
+                
+                if (!response.ok) {
+                    // Alternatif: başka bir model dene
+                    const altResponse = await fetch('https://api-inference.huggingface.co/models/CompVis/stable-diffusion-v1-4', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            inputs: prompt
+                        })
+                    });
+                    
+                    if (altResponse.ok) {
+                        const blob = await altResponse.blob();
+                        return URL.createObjectURL(blob);
+                    }
+                    throw new Error('API hatası');
+                }
+                
+                const blob = await response.blob();
+                return URL.createObjectURL(blob);
+            } catch (error) {
+                console.error('Görsel oluşturma hatası:', error);
+                return null;
+            }
+        }
+        
         // AI API ile cevap al - Cohere veya alternatif
         async function getAIResponse(userMessage) {
             try {
@@ -619,19 +675,29 @@
                 return "Egemen kişisi bu yapay zekanın yapımcısındır ve 13 yaşındandır.";
             }
             
-            // Görsel oluşturma kontrolü
+            // Görsel oluşturma kontrolü - doğrudan API ile
             if (smartMatch(userMessage, ['görsel oluştur', 'resim yap', 'görsel yap', 'resim oluştur', 'ai görsel', 'görsel üret', 'resim üret'])) {
-                return "Evet, AI görsel oluşturabilir! Size görsel oluşturmak için birkaç seçenek sunabilirim:<br><br>1. <a href='https://arting.ai/tr/ai-app' target='_blank' style='color: #4ade80; text-decoration: underline;'>Arting.ai</a> - Ücretsiz AI görsel oluşturma<br>2. <a href='https://bylo.ai/tr/text-to-image' target='_blank' style='color: #4ade80; text-decoration: underline;'>Bylo.ai</a> - Yüksek kaliteli görseller<br>3. <a href='https://www.kapwing.com/tr/ai/image-generator' target='_blank' style='color: #4ade80; text-decoration: underline;'>Kapwing</a> - Fotogerçekçi görseller<br><br>Hangi tür bir görsel oluşturmak istersiniz? Bana açıklayın, size en uygun aracı önerebilirim.";
+                // Prompt'u çıkar
+                let imagePrompt = userMessage.replace(/görsel|resim|yap|oluştur|üret|ai/gi, '').trim();
+                if (imagePrompt.length < 3) {
+                    return "Hangi konuda bir görsel oluşturmak istersiniz? Örneğin: 'kedi görseli yap', 'uzay resmi oluştur' gibi.";
+                }
+                
+                // Özel işaret - görsel oluşturuluyor
+                return "IMAGE_GENERATING:" + imagePrompt;
             }
             
-            // Görsel oluşturma isteği - detaylı
-            if (lowerMessage.includes('görsel') && (lowerMessage.includes('yap') || lowerMessage.includes('oluştur') || lowerMessage.includes('üret'))) {
-                // Kullanıcının ne istediğini anlamaya çalış
-                const imagePrompt = userMessage.replace(/görsel|resim|yap|oluştur|üret/gi, '').trim();
-                if (imagePrompt.length > 3) {
-                    return `Anladım! "${imagePrompt}" konulu bir görsel oluşturmak istiyorsunuz. Size şu araçları öneririm:<br><br>• <a href='https://arting.ai/tr/ai-app' target='_blank' style='color: #4ade80; text-decoration: underline;'>Arting.ai</a> - Ücretsiz ve kolay kullanım<br>• <a href='https://bylo.ai/tr/text-to-image' target='_blank' style='color: #4ade80; text-decoration: underline;'>Bylo.ai</a> - Yüksek kalite<br><br>Bu sitelere gidip "${imagePrompt}" yazarsanız, AI size görsel oluşturur!`;
+            // Görsel oluşturma isteği - detaylı prompt ile
+            if ((lowerMessage.includes('görsel') || lowerMessage.includes('resim')) && 
+                (lowerMessage.includes('yap') || lowerMessage.includes('oluştur') || lowerMessage.includes('üret'))) {
+                // Prompt'u çıkar
+                let imagePrompt = userMessage.replace(/görsel|resim|yap|oluştur|üret|ai|bir|görseli|resmi/gi, '').trim();
+                if (imagePrompt.length < 3) {
+                    return "Hangi konuda bir görsel oluşturmak istersiniz? Örneğin: 'kedi görseli yap', 'uzay resmi oluştur' gibi.";
                 }
-                return "Hangi tür bir görsel oluşturmak istersiniz? Bana açıklayın, size yardımcı olabilirim.";
+                
+                // Özel işaret - görsel oluşturuluyor
+                return "IMAGE_GENERATING:" + imagePrompt;
             }
             
             // Oyun yapma kontrolü
@@ -898,7 +964,7 @@ function touchStarted() {
             
             // AI görsel oluşturabilir misin sorusu
             if (smartMatch(userMessage, ['ai görsel oluşturabilir mi', 'görsel oluşturabilir misin', 'resim yapabilir misin', 'görsel yapabilir misin'])) {
-                return "Evet, AI görsel oluşturabilir! Ben doğrudan görsel oluşturmam ama size ücretsiz AI görsel oluşturma araçları önerebilirim. 'Görsel oluştur' veya 'resim yap' dediğinizde size en iyi araçları gösterebilirim. Hangi tür bir görsel oluşturmak istersiniz?";
+                return "Evet, AI görsel oluşturabilirim! 'Görsel oluştur' veya 'resim yap' dediğinizde, istediğiniz konuda görsel oluşturabilirim. Örneğin: 'kedi görseli yap', 'uzay resmi oluştur' gibi. Hangi tür bir görsel oluşturmak istersiniz?";
             }
 
             // Soru sorma - kesin bilgiler
@@ -975,11 +1041,36 @@ function touchStarted() {
             try {
                 // AI'dan cevap al
                 const response = await generateResponse(message);
-                typingIndicator.classList.remove('active');
-                addMessage(response, 'ai');
                 
-                // AI cevabını geçmişe ekle
-                conversationHistory.push({ role: 'assistant', content: response });
+                // Görsel oluşturma kontrolü
+                if (response && response.startsWith('IMAGE_GENERATING:')) {
+                    const prompt = response.replace('IMAGE_GENERATING:', '');
+                    typingIndicator.classList.remove('active');
+                    
+                    // Loading mesajı göster
+                    const loadingMsg = addMessage(`Görsel oluşturuluyor: "${prompt}"... Lütfen bekleyin.`, 'ai');
+                    
+                    // Görsel oluştur
+                    const imageUrl = await generateImage(prompt);
+                    
+                    // Loading mesajını kaldır
+                    loadingMsg.remove();
+                    
+                    if (imageUrl) {
+                        const finalResponse = `"${prompt}" konulu görseliniz hazır!<br><img src="${imageUrl}" alt="AI Generated Image" style="max-width: 100%; border-radius: 0.5rem; margin-top: 0.5rem; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);">`;
+                        addMessage(finalResponse, 'ai');
+                        conversationHistory.push({ role: 'assistant', content: finalResponse });
+                    } else {
+                        addMessage(`"${prompt}" konulu görsel oluşturulamadı. Lütfen tekrar deneyin veya farklı bir prompt deneyin. Alternatif: <a href='https://arting.ai/tr/ai-app' target='_blank' style='color: #4ade80; text-decoration: underline;'>Arting.ai</a>`, 'ai');
+                        conversationHistory.push({ role: 'assistant', content: 'Görsel oluşturulamadı' });
+                    }
+                } else {
+                    typingIndicator.classList.remove('active');
+                    addMessage(response, 'ai');
+                    
+                    // AI cevabını geçmişe ekle
+                    conversationHistory.push({ role: 'assistant', content: response });
+                }
                 
                 // Geçmişi sınırla (son 10 mesaj)
                 if (conversationHistory.length > 10) {
@@ -1011,6 +1102,9 @@ function touchStarted() {
             
             // Scroll to bottom
             chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            // Mesaj div'ini döndür (kaldırmak için)
+            return messageDiv;
         }
 
         // Event listeners
