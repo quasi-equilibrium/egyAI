@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>egyAI - Matematik Asistanı</title>
+    <title>egyAI</title>
     <style>
         * {
             margin: 0;
@@ -108,6 +108,7 @@
             padding: 0.75rem 1rem;
             border-radius: 1rem;
             word-wrap: break-word;
+            line-height: 1.5;
         }
 
         .message.user .message-content {
@@ -211,8 +212,8 @@
 </head>
 <body>
     <div class="header">
-        <h1>🤖 egyAI - Matematik Asistanı</h1>
-        <p>Toplama, çıkarma, çarpma, bölme işlemlerini hızlıca çözebilirim</p>
+        <h1>🤖 egyAI</h1>
+        <p>Size nasıl yardımcı olabilirim?</p>
     </div>
 
     <div class="chat-container">
@@ -220,13 +221,13 @@
             <div class="message ai">
                 <div class="message-avatar">🤖</div>
                 <div class="message-content">
-                    Merhaba! Ben egyAI. Matematik işlemlerinizi çözebilirim. Örneğin: "5 + 3", "10 * 4", "20 / 2" gibi sorular sorabilirsiniz.
+                    Günaydın! Havalar nasıl? Size nasıl yardımcı olabilirim?
                 </div>
             </div>
         </div>
         <div class="typing-indicator" id="typingIndicator">AI düşünüyor...</div>
         <div class="input-container">
-            <input type="text" id="userInput" placeholder="Matematik işlemi yazın (örn: 5 + 3, 10 * 4)..." autocomplete="off">
+            <input type="text" id="userInput" placeholder="Bir şeyler yazın..." autocomplete="off">
             <button id="sendButton">Gönder</button>
         </div>
     </div>
@@ -240,7 +241,6 @@
         // Matematik işlemini çöz
         function solveMath(expression) {
             try {
-                // Güvenlik için sadece sayılar ve matematik operatörlerine izin ver
                 const cleanExpression = expression
                     .replace(/[^0-9+\-*/().\s]/g, '')
                     .trim();
@@ -249,10 +249,8 @@
                     return null;
                 }
 
-                // eval kullanarak hesapla (güvenli çünkü temizledik)
                 const result = eval(cleanExpression);
                 
-                // Sonucun geçerli bir sayı olduğunu kontrol et
                 if (typeof result === 'number' && !isNaN(result) && isFinite(result)) {
                     return result;
                 }
@@ -264,16 +262,15 @@
 
         // Matematik ifadesini tespit et
         function detectMathExpression(text) {
-            // Türkçe matematik terimlerini de destekle
             const patterns = [
-                /(\d+)\s*[+\u002B]\s*(\d+)/,  // Toplama: 5 + 3
-                /(\d+)\s*[-−]\s*(\d+)/,        // Çıkarma: 10 - 5
-                /(\d+)\s*[*×x]\s*(\d+)/,       // Çarpma: 5 * 3, 5 × 3, 5x3
-                /(\d+)\s*[/÷]\s*(\d+)/,        // Bölme: 10 / 2, 10 ÷ 2
-                /(\d+)\s*artı\s*(\d+)/i,       // 5 artı 3
-                /(\d+)\s*eksi\s*(\d+)/i,       // 10 eksi 5
-                /(\d+)\s*çarpı\s*(\d+)/i,      // 5 çarpı 3
-                /(\d+)\s*bölü\s*(\d+)/i,       // 10 bölü 2
+                /(\d+)\s*[+\u002B]\s*(\d+)/,
+                /(\d+)\s*[-−]\s*(\d+)/,
+                /(\d+)\s*[*×x]\s*(\d+)/,
+                /(\d+)\s*[/÷]\s*(\d+)/,
+                /(\d+)\s*artı\s*(\d+)/i,
+                /(\d+)\s*eksi\s*(\d+)/i,
+                /(\d+)\s*çarpı\s*(\d+)/i,
+                /(\d+)\s*bölü\s*(\d+)/i,
             ];
 
             for (const pattern of patterns) {
@@ -294,7 +291,6 @@
                 }
             }
 
-            // Direkt matematik ifadesi varsa
             if (/[\d+\-*/().\s]+/.test(text)) {
                 return text.replace(/[^0-9+\-*/().\s]/g, '').trim();
             }
@@ -302,30 +298,98 @@
             return null;
         }
 
-        // AI cevabı oluştur
+        // Genel AI cevabı oluştur
         function generateResponse(userMessage) {
-            const mathExpr = detectMathExpression(userMessage);
+            const lowerMessage = userMessage.toLowerCase().trim();
             
+            // Önce matematik kontrolü
+            const mathExpr = detectMathExpression(userMessage);
             if (mathExpr) {
                 const result = solveMath(mathExpr);
                 if (result !== null) {
                     return `Sonuç: <span class="result-highlight">${result}</span><br><small>(${mathExpr} = ${result})</small>`;
-                } else {
-                    return "Üzgünüm, bu matematik işlemini çözemedim. Lütfen geçerli bir işlem yazın (örn: 5 + 3, 10 * 4).";
-                }
-            } else {
-                // Genel cevaplar
-                const lowerMessage = userMessage.toLowerCase();
-                if (lowerMessage.includes('merhaba') || lowerMessage.includes('selam') || lowerMessage.includes('hey')) {
-                    return "Merhaba! Matematik işlemlerinizi çözebilirim. Bir işlem yazın!";
-                } else if (lowerMessage.includes('teşekkür') || lowerMessage.includes('sağol')) {
-                    return "Rica ederim! Başka bir sorunuz var mı?";
-                } else if (lowerMessage.includes('ne yapabilirsin') || lowerMessage.includes('yardım')) {
-                    return "Toplama (+), çıkarma (-), çarpma (*) ve bölme (/) işlemlerini yapabilirim. Örnek: '5 + 3', '10 * 4', '20 / 2'";
-                } else {
-                    return "Matematik işlemlerinizi çözebilirim. Lütfen bir işlem yazın (örn: 5 + 3, 10 * 4).";
                 }
             }
+
+            // Selamlaşma
+            if (lowerMessage.includes('merhaba') || lowerMessage.includes('selam') || lowerMessage.includes('hey') || lowerMessage.includes('günaydın') || lowerMessage.includes('iyi günler')) {
+                const greetings = [
+                    "Merhaba! Size nasıl yardımcı olabilirim?",
+                    "Selam! Ne hakkında konuşmak istersiniz?",
+                    "Günaydın! Bugün nasılsınız?",
+                    "Merhaba! Ne yapmak istersiniz?"
+                ];
+                return greetings[Math.floor(Math.random() * greetings.length)];
+            }
+
+            // Havalar hakkında
+            if (lowerMessage.includes('hava') || lowerMessage.includes('havalar') || lowerMessage.includes('hava durumu') || lowerMessage.includes('hava nasıl')) {
+                const weatherResponses = [
+                    "Maalesef gerçek zamanlı hava durumu bilgisine erişimim yok, ancak dışarı çıkacaksanız hava durumunu kontrol etmenizi öneririm. Size nasıl başka bir konuda yardımcı olabilirim?",
+                    "Hava durumu bilgisi için bir hava durumu uygulamasına bakmanızı öneririm. Başka bir sorunuz var mı?",
+                    "Hava durumu hakkında bilgi veremem, ancak size başka konularda yardımcı olabilirim. Ne yapmak istersiniz?"
+                ];
+                return weatherResponses[Math.floor(Math.random() * weatherResponses.length)];
+            }
+
+            // Nasılsın
+            if (lowerMessage.includes('nasılsın') || lowerMessage.includes('nasıl gidiyor') || lowerMessage.includes('ne haber')) {
+                return "Teşekkür ederim, iyiyim! Size nasıl yardımcı olabilirim?";
+            }
+
+            // Teşekkür
+            if (lowerMessage.includes('teşekkür') || lowerMessage.includes('sağol') || lowerMessage.includes('sağ ol') || lowerMessage.includes('eyvallah')) {
+                return "Rica ederim! Başka bir konuda yardımcı olabilir miyim?";
+            }
+
+            // Ne yapabilirsin
+            if (lowerMessage.includes('ne yapabilirsin') || lowerMessage.includes('yapabilir misin') || lowerMessage.includes('yardım') || lowerMessage.includes('ne işe yararsın')) {
+                return "Size çeşitli konularda yardımcı olabilirim! Matematik işlemleri yapabilirim, sorularınızı cevaplayabilirim, sohbet edebilirim. Ne hakkında konuşmak istersiniz?";
+            }
+
+            // Soru sorma (ne, nasıl, neden, kim, nerede)
+            if (lowerMessage.includes('ne ') || lowerMessage.includes('nasıl ') || lowerMessage.includes('neden ') || lowerMessage.includes('kim ') || lowerMessage.includes('nerede ')) {
+                // Genel bilgi soruları için akıllı cevaplar
+                if (lowerMessage.includes('ne zaman')) {
+                    return "Zaman hakkında sorular için takvime bakmanızı öneririm. Başka bir sorunuz var mı?";
+                }
+                if (lowerMessage.includes('nasıl yapılır') || lowerMessage.includes('nasıl yapabilirim')) {
+                    return "Size yardımcı olmak için daha spesifik bir soru sorabilir misiniz? Hangi konuda yardıma ihtiyacınız var?";
+                }
+                if (lowerMessage.includes('neden')) {
+                    return "Bu ilginç bir soru! Daha fazla detay verirseniz size daha iyi yardımcı olabilirim.";
+                }
+                return "Bu konuda size yardımcı olmak isterim. Biraz daha detay verebilir misiniz?";
+            }
+
+            // Emoji veya kısa mesajlar
+            if (lowerMessage.length <= 2 || /^[!?.]+$/.test(lowerMessage)) {
+                return "Anladım! Size nasıl yardımcı olabilirim?";
+            }
+
+            // Genel sohbet - akıllı cevaplar
+            if (lowerMessage.includes('iyi') || lowerMessage.includes('güzel') || lowerMessage.includes('harika')) {
+                return "Harika! Başka bir konuda yardımcı olabilir miyim?";
+            }
+
+            if (lowerMessage.includes('kötü') || lowerMessage.includes('kötüyüm') || lowerMessage.includes('üzgün')) {
+                return "Üzgünüm bunu duyduğuma. Size nasıl yardımcı olabilirim? Belki başka bir konuda konuşmak ister misiniz?";
+            }
+
+            // Veda
+            if (lowerMessage.includes('görüşürüz') || lowerMessage.includes('hoşça kal') || lowerMessage.includes('bye') || lowerMessage.includes('güle güle')) {
+                return "Görüşmek üzere! İyi günler dilerim!";
+            }
+
+            // Varsayılan - doğal ve yardımcı cevap
+            const defaultResponses = [
+                "Anladım. Bu konuda size nasıl yardımcı olabilirim?",
+                "İlginç! Biraz daha detay verebilir misiniz?",
+                "Size bu konuda yardımcı olmak isterim. Daha spesifik bir soru sorabilir misiniz?",
+                "Anladım. Başka bir şey sormak ister misiniz?",
+                "Bu konuda size yardımcı olabilirim. Ne hakkında daha fazla bilgi istersiniz?"
+            ];
+            return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
         }
 
         // Mesaj gönder
@@ -340,12 +404,12 @@
             // Typing indicator göster
             typingIndicator.classList.add('active');
             
-            // Hızlı cevap için kısa bir gecikme (gerçek zamanlı hissi için)
+            // Hızlı cevap için kısa bir gecikme
             setTimeout(() => {
                 typingIndicator.classList.remove('active');
                 const response = generateResponse(message);
                 addMessage(response, 'ai');
-            }, 300); // 300ms gecikme - hızlı cevap
+            }, 400); // 400ms - doğal hissiyat için
         }
 
         // Mesaj ekle
