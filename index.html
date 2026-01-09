@@ -399,11 +399,102 @@
             return false;
         }
 
+        // Bilgi tabanı - her konuya özel cevaplar
+        const knowledgeBase = {
+            // Teknoloji
+            'bilgisayar': [
+                "Bilgisayarlar, veri işleme ve hesaplama yapabilen elektronik cihazlardır. Modern bilgisayarlar CPU, RAM, depolama ve ekran gibi bileşenlerden oluşur. İlk bilgisayar ENIAC 1946'da yapılmıştı ve oda büyüklüğündeydi!",
+                "Bilgisayarınızın performansını artırmak için düzenli olarak gereksiz dosyaları temizleyin, güncellemeleri yapın ve antivirüs yazılımı kullanın. SSD kullanmak da hızı önemli ölçüde artırır."
+            ],
+            'telefon': [
+                "İlk telefon 1876'da Alexander Graham Bell tarafından icat edildi. Modern akıllı telefonlar artık küçük bilgisayarlar gibi çalışıyor ve kamera, GPS, internet gibi birçok özellik içeriyor.",
+                "Telefonunuzun pil ömrünü uzatmak için parlaklığı düşürün, gereksiz uygulamaları kapatın ve karanlık mod kullanın. Ayrıca şarjı %20-80 arasında tutmak bataryanın ömrünü uzatır."
+            ],
+            'internet': [
+                "İnternet, dünya çapında milyarlarca cihazı birbirine bağlayan dev bir ağdır. 1969'da ARPANET olarak başladı ve bugün 4.6 milyardan fazla kullanıcıya sahip.",
+                "İnternet hızınızı test etmek için speedtest.net gibi siteleri kullanabilirsiniz. WiFi hızınızı artırmak için router'ı merkezi bir yere koyun ve eski cihazları güncelleyin."
+            ],
+            
+            // Bilim
+            'uzay': [
+                "Uzay, Dünya'nın atmosferinin ötesindeki sonsuz boşluktur. En yakın yıldız olan Proxima Centauri 4.24 ışık yılı uzaklıkta. Samanyolu galaksisinde 100-400 milyar yıldız olduğu tahmin ediliyor!",
+                "Mars'ta bir gün 24 saat 37 dakika sürer. Venüs ise Güneş Sistemi'ndeki en sıcak gezegen - yüzey sıcaklığı 462°C'ye ulaşır!"
+            ],
+            'dünya': [
+                "Dünya yaklaşık 4.5 milyar yaşındadır ve %71'i suyla kaplıdır. En derin nokta Mariana Çukuru 11 kilometre derinliktedir. Dünya'nın çevresi ekvatorda 40,075 km'dir.",
+                "Dünya'nın atmosferi %78 azot, %21 oksijen ve %1 diğer gazlardan oluşur. Ozon tabakası bizi zararlı UV ışınlarından korur."
+            ],
+            
+            // Hayvanlar
+            'kedi': [
+                "Kediler yaklaşık 9,500 yıl önce evcilleştirildi. Ortalama bir kedi günde 12-16 saat uyur. Kedilerin 200'den fazla koku alma hücresi vardır - insanlardan 14 kat fazla!",
+                "Kediler miyavlamayı sadece insanlarla iletişim kurmak için kullanır. Birbirleriyle iletişim kurarken farklı sesler çıkarırlar. En eski kedi türü Mısır'dan gelir."
+            ],
+            'köpek': [
+                "Köpekler insanın en iyi dostudur ve 15,000 yıldan fazla süredir evcilleştirilmiştir. 340'ın üzerinde köpek ırkı vardır. Köpekler insan yüzlerini ayırt edebilir ve duyguları anlayabilir.",
+                "Köpeklerin koku alma duyusu insanlardan 10,000-100,000 kat daha güçlüdür. Bu yüzden arama-kurtarma ve bomba tespiti gibi işlerde kullanılırlar."
+            ],
+            
+            // Yemek
+            'yemek': [
+                "Türk mutfağı dünyanın en zengin mutfaklarından biridir. Baklava, döner, kebap, mantı gibi yemekler dünya çapında ünlüdür. Türkiye'de 300'den fazla çeşit peynir üretilir!",
+                "Sağlıklı beslenme için günde 5 porsiyon meyve-sebze yemek önerilir. Akdeniz diyeti kalp sağlığı için en iyi diyetlerden biridir."
+            ],
+            'kahve': [
+                "Kahve, Etiyopya'da keşfedildi ve dünyada en çok tüketilen içeceklerden biridir. Türk kahvesi 2013'te UNESCO tarafından kültürel miras olarak kabul edildi.",
+                "Kahve antioksidanlar içerir ve düzenli tüketimi bazı hastalıklara karşı koruyucu olabilir. Ancak günde 3-4 fincandan fazla içmemek önerilir."
+            ],
+            
+            // Spor
+            'futbol': [
+                "Futbol dünyanın en popüler sporudur ve 3.5 milyardan fazla hayranı vardır. İlk modern futbol kuralları 1863'te İngiltere'de yazıldı. Dünya Kupası 1930'dan beri düzenleniyor.",
+                "Futbolda bir maç 90 dakika sürer (45+45). En çok gol atan oyuncu Cristiano Ronaldo'dur. Türkiye'de ilk futbol maçı 1897'de oynandı."
+            ],
+            'basketbol': [
+                "Basketbol 1891'de James Naismith tarafından icat edildi. NBA dünyanın en prestijli basketbol ligidir. Bir basketbol potası 3.05 metre yüksekliğindedir.",
+                "En uzun basketbolcu 2.31 metre boyunda Gheorghe Mureşan'dır. Michael Jordan tüm zamanların en iyi basketbolcularından biri kabul edilir."
+            ],
+            
+            // Genel bilgiler
+            'rastgele': [
+                "İlginç bir bilgi: Bal arıları saniyede 200 kez kanat çırpar! Bir arı kolonisi günde 2-3 kg bal üretebilir.",
+                "Bir insanın beyninde yaklaşık 86 milyar nöron vardır. Beyin vücut ağırlığının %2'sini oluşturur ama enerjinin %20'sini kullanır!",
+                "Okyanusların sadece %5'i keşfedilmiştir. Derin okyanuslarda henüz keşfedilmemiş binlerce tür yaşıyor olabilir.",
+                "Bir günde yaklaşık 500 milyon tweet atılıyor. İnternette her saniye 2.8 milyon e-posta gönderiliyor!",
+                "Müzik dinlemek stresi azaltır ve hafızayı güçlendirir. Klasik müzik özellikle konsantrasyonu artırır.",
+                "Gülmek sadece 15 kalori yakar ama endorfin salgılar ve ruh halini iyileştirir. Günde 15-20 kez gülmek sağlık için faydalıdır."
+            ]
+        };
+
+        // Konu tespit et
+        function detectTopic(message) {
+            const lower = message.toLowerCase();
+            const topics = {
+                'bilgisayar': ['bilgisayar', 'pc', 'laptop', 'masaüstü', 'işlemci', 'ram', 'ekran kartı'],
+                'telefon': ['telefon', 'iphone', 'android', 'akıllı telefon', 'cep telefonu'],
+                'internet': ['internet', 'wifi', 'ağ', 'network', 'bağlantı'],
+                'uzay': ['uzay', 'gezegen', 'yıldız', 'galaksi', 'mars', 'ay', 'güneş'],
+                'dünya': ['dünya', 'yeryüzü', 'atmosfer', 'iklim'],
+                'kedi': ['kedi', 'kedi', 'pisi', 'mırnav'],
+                'köpek': ['köpek', 'it', 'hav hav'],
+                'yemek': ['yemek', 'yemek', 'yemek', 'yemek', 'mutfak', 'tarif'],
+                'kahve': ['kahve', 'türk kahvesi', 'espresso'],
+                'futbol': ['futbol', 'futbol', 'gol', 'maç', 'takım'],
+                'basketbol': ['basketbol', 'basket', 'nba']
+            };
+
+            for (const [topic, keywords] of Object.entries(topics)) {
+                if (keywords.some(keyword => lower.includes(keyword))) {
+                    return topic;
+                }
+            }
+            return null;
+        }
+
         // Genel AI cevabı oluştur
         function generateResponse(userMessage) {
             const lowerMessage = userMessage.toLowerCase().trim();
             const normalized = normalizeMessage(userMessage);
-            const lowerNormalized = normalized.toLowerCase();
             
             // Önce matematik kontrolü
             const mathExpr = detectMathExpression(userMessage);
@@ -414,89 +505,110 @@
                 }
             }
 
+            // Konu tespit et ve bilgi ver
+            const topic = detectTopic(userMessage);
+            if (topic && knowledgeBase[topic]) {
+                const responses = knowledgeBase[topic];
+                return responses[Math.floor(Math.random() * responses.length)];
+            }
+
             // Hastayım / Sağlık durumu
             if (smartMatch(userMessage, ['hastayım', 'hastayim', 'hasrtayım', 'hastaym', 'hasta', 'hastalandım', 'rahatsızım'])) {
-                return "Geçmiş olsun! Umarım yakında iyileşirsiniz. Size nasıl yardımcı olabilirim? İlaç kullanıyorsanız doktorunuzun tavsiyelerine uymayı unutmayın.";
+                return "Geçmiş olsun! İyileşmek için bol bol dinlenin, sıvı tüketin ve doktorunuzun tavsiyelerine uyun. Hafif yürüyüşler ve temiz hava da iyileşmeyi hızlandırır. Eğer ateşiniz varsa veya belirtiler kötüleşirse mutlaka bir sağlık kuruluşuna başvurun.";
             }
 
             // Selamlaşma
             if (smartMatch(userMessage, ['merhaba', 'selam', 'hey', 'günaydın', 'iyi günler', 'selamun aleyküm'])) {
                 const greetings = [
-                    "Merhaba! Size nasıl yardımcı olabilirim?",
+                    "Merhaba! Bugün size nasıl yardımcı olabilirim?",
                     "Selam! Ne hakkında konuşmak istersiniz?",
                     "Günaydın! Bugün nasılsınız?",
-                    "Merhaba! Ne yapmak istersiniz?"
+                    "Merhaba! Hangi konuda bilgi almak istersiniz?"
                 ];
                 return greetings[Math.floor(Math.random() * greetings.length)];
             }
 
             // Havalar hakkında
             if (smartMatch(userMessage, ['hava', 'havalar', 'hava durumu', 'hava nasıl', 'havalar nasıl'])) {
-                const weatherResponses = [
-                    "Maalesef gerçek zamanlı hava durumu bilgisine erişimim yok, ancak dışarı çıkacaksanız hava durumunu kontrol etmenizi öneririm. Size nasıl başka bir konuda yardımcı olabilirim?",
-                    "Hava durumu bilgisi için bir hava durumu uygulamasına bakmanızı öneririm. Başka bir sorunuz var mı?",
-                    "Hava durumu hakkında bilgi veremem, ancak size başka konularda yardımcı olabilirim. Ne yapmak istersiniz?"
+                const weatherFacts = [
+                    "Hava durumu hakkında gerçek zamanlı bilgi veremem ama size ilginç bir bilgi verebilirim: Dünya'da her saniye yaklaşık 100 yıldırım düşer! Yağmurlu günlerde kapalı alanlarda kalmak en güvenlisi.",
+                    "Hava durumu değişkenlik gösterebilir. Mevsim geçişlerinde hava sıcaklıkları hızla değişir, bu yüzden kat kat giyinmek iyi bir fikirdir. Hava durumu uygulamalarından güncel bilgi alabilirsiniz."
                 ];
-                return weatherResponses[Math.floor(Math.random() * weatherResponses.length)];
+                return weatherFacts[Math.floor(Math.random() * weatherFacts.length)];
             }
 
             // Nasılsın
-            if (smartMatch(userMessage, ['nasılsın', 'nasıl gidiyor', 'ne haber', 'nasilsin', 'nasılsın'])) {
-                return "Teşekkür ederim, iyiyim! Size nasıl yardımcı olabilirim?";
+            if (smartMatch(userMessage, ['nasılsın', 'nasıl gidiyor', 'ne haber', 'nasilsin'])) {
+                return "Teşekkür ederim, çok iyiyim! Size yardımcı olmak için buradayım. Bugün nasılsınız, her şey yolunda mı?";
             }
 
             // Teşekkür
             if (smartMatch(userMessage, ['teşekkür', 'sağol', 'sağ ol', 'eyvallah', 'tesekkur', 'tesekkurler', 'sağolun'])) {
-                return "Rica ederim! Başka bir konuda yardımcı olabilir miyim?";
+                return "Rica ederim, ne demek! Başka bir konuda yardımcı olabilir miyim?";
             }
 
             // Ne yapabilirsin
             if (smartMatch(userMessage, ['ne yapabilirsin', 'yapabilir misin', 'yardım', 'ne işe yararsın', 'ne yapabilir'])) {
-                return "Size çeşitli konularda yardımcı olabilirim! Matematik işlemleri yapabilirim, sorularınızı cevaplayabilirim, sohbet edebilirim. Ne hakkında konuşmak istersiniz?";
+                return "Size birçok konuda yardımcı olabilirim! Matematik işlemleri yapabilirim, teknoloji, bilim, spor, yemek gibi konularda bilgi verebilirim, sohbet edebilirim. Hangi konuda bilgi almak istersiniz?";
             }
 
-            // Soru sorma (ne, nasıl, neden, kim, nerede)
-            if (smartMatch(userMessage, ['ne ', 'nasıl ', 'neden ', 'kim ', 'nerede '])) {
-                if (smartMatch(userMessage, ['ne zaman'])) {
-                    return "Zaman hakkında sorular için takvime bakmanızı öneririm. Başka bir sorunuz var mı?";
-                }
-                if (smartMatch(userMessage, ['nasıl yapılır', 'nasıl yapabilirim'])) {
-                    return "Size yardımcı olmak için daha spesifik bir soru sorabilir misiniz? Hangi konuda yardıma ihtiyacınız var?";
-                }
-                if (smartMatch(userMessage, ['neden'])) {
-                    return "Bu ilginç bir soru! Daha fazla detay verirseniz size daha iyi yardımcı olabilirim.";
-                }
-                return "Bu konuda size yardımcı olmak isterim. Biraz daha detay verebilir misiniz?";
+            // Soru sorma - detaylı cevaplar
+            if (smartMatch(userMessage, ['ne zaman'])) {
+                const timeFacts = [
+                    "Şu anki zamanı bilmiyorum ama size ilginç bir bilgi verebilirim: Bir yıl 365.25 gündür, bu yüzden her 4 yılda bir artık yıl olur. Saat dilimleri 1884'te standartlaştırıldı.",
+                    "Zaman göreceli bir kavramdır. Einstein'ın görelilik teorisine göre, hızlı hareket eden bir kişi için zaman daha yavaş geçer. GPS uyduları bu etkiyi hesaba katmak zorundadır!"
+                ];
+                return timeFacts[Math.floor(Math.random() * timeFacts.length)];
+            }
+
+            if (smartMatch(userMessage, ['nasıl yapılır', 'nasıl yapabilirim', 'nasıl öğrenirim'])) {
+                const howToAnswers = [
+                    "Öğrenmek için adım adım ilerlemek önemlidir. Önce temel bilgileri öğrenin, sonra pratik yapın. Her gün biraz zaman ayırmak büyük fark yaratır. İnternette birçok ücretsiz kaynak var!",
+                    "Yeni bir şey öğrenmek için sabırlı olun ve hatalardan ders çıkarın. Pratik yapmak en iyi öğretmendir. Başkalarından yardım almak ve örnekleri incelemek de çok faydalıdır."
+                ];
+                return howToAnswers[Math.floor(Math.random() * howToAnswers.length)];
+            }
+
+            if (smartMatch(userMessage, ['neden'])) {
+                const whyAnswers = [
+                    "Bu çok ilginç bir soru! Her şeyin bir nedeni vardır. Bilim, doğa olaylarını ve nedenlerini anlamamıza yardımcı olur. Merak etmek ve sorgulamak öğrenmenin temelidir.",
+                    "Neden sorusu bilimin başlangıcıdır. İnsanlar binlerce yıldır doğayı ve evreni anlamak için 'neden' sorusunu soruyor. Bu sorular sayesinde teknoloji ve bilim ilerliyor."
+                ];
+                return whyAnswers[Math.floor(Math.random() * whyAnswers.length)];
             }
 
             // Emoji veya kısa mesajlar
             if (lowerMessage.length <= 2 || /^[!?.]+$/.test(lowerMessage)) {
-                return "Anladım! Size nasıl yardımcı olabilirim?";
+                return "Anladım! Size nasıl yardımcı olabilirim? Bir soru sorabilir veya bir konu hakkında bilgi alabilirsiniz.";
             }
 
             // Genel sohbet - akıllı cevaplar
             if (smartMatch(userMessage, ['iyi', 'güzel', 'harika', 'iyiyim', 'iyi gidiyor'])) {
-                return "Harika! Başka bir konuda yardımcı olabilir miyim?";
+                return "Harika! İyi olmanıza sevindim. Başka bir konuda yardımcı olabilir miyim? Belki yeni bir şey öğrenmek ister misiniz?";
             }
 
-            if (smartMatch(userMessage, ['kötü', 'kötüyüm', 'üzgün', 'kötüyüm', 'uzgun', 'kötü gidiyor'])) {
-                return "Üzgünüm bunu duyduğuma. Size nasıl yardımcı olabilirim? Belki başka bir konuda konuşmak ister misiniz?";
+            if (smartMatch(userMessage, ['kötü', 'kötüyüm', 'üzgün', 'uzgun', 'kötü gidiyor'])) {
+                return "Üzgünüm bunu duyduğuma. Zor zamanlar geçiriyorsanız, yakınlarınızla konuşmak veya bir uzmandan destek almak yardımcı olabilir. Her zorluk geçicidir ve daha iyi günler gelecektir. Size nasıl yardımcı olabilirim?";
             }
 
             // Veda
             if (smartMatch(userMessage, ['görüşürüz', 'hoşça kal', 'bye', 'güle güle', 'hosca kal'])) {
-                return "Görüşmek üzere! İyi günler dilerim!";
+                return "Görüşmek üzere! İyi günler dilerim, umarım gününüz güzel geçer!";
             }
 
-            // Varsayılan - doğal ve yardımcı cevap
-            const defaultResponses = [
-                "Anladım. Bu konuda size nasıl yardımcı olabilirim?",
-                "İlginç! Biraz daha detay verebilir misiniz?",
-                "Size bu konuda yardımcı olmak isterim. Daha spesifik bir soru sorabilir misiniz?",
-                "Anladım. Başka bir şey sormak ister misiniz?",
-                "Bu konuda size yardımcı olabilirim. Ne hakkında daha fazla bilgi istersiniz?"
+            // Rastgele konular için bilgi ver
+            if (lowerMessage.includes('rastgele') || lowerMessage.includes('ilginç') || lowerMessage.includes('bilgi')) {
+                const randomFacts = knowledgeBase['rastgele'];
+                return randomFacts[Math.floor(Math.random() * randomFacts.length)];
+            }
+
+            // Varsayılan - her zaman bir cevap ver
+            const contextualResponses = [
+                "Bu konuda size bilgi verebilirim. " + knowledgeBase['rastgele'][Math.floor(Math.random() * knowledgeBase['rastgele'].length)],
+                "İlginç bir konu! " + knowledgeBase['rastgele'][Math.floor(Math.random() * knowledgeBase['rastgele'].length)],
+                "Size bu konuda yardımcı olabilirim. " + knowledgeBase['rastgele'][Math.floor(Math.random() * knowledgeBase['rastgele'].length)]
             ];
-            return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
+            return contextualResponses[Math.floor(Math.random() * contextualResponses.length)];
         }
 
         // Mesaj gönder
