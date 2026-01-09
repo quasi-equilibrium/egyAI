@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Proje | Yakında</title>
+    <title>egyAI - Matematik Asistanı</title>
     <style>
         * {
             margin: 0;
@@ -13,164 +13,373 @@
 
         body {
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
             color: #fff;
-            overflow: hidden;
-        }
-
-        .container {
-            text-align: center;
-            padding: 2rem;
-            max-width: 600px;
-        }
-
-        .logo {
-            width: 120px;
-            height: 120px;
-            margin: 0 auto 2rem;
-            background: linear-gradient(135deg, #e94560 0%, #533483 100%);
-            border-radius: 30px;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 3rem;
-            box-shadow: 0 20px 60px rgba(233, 69, 96, 0.3);
-            animation: float 3s ease-in-out infinite;
+            flex-direction: column;
         }
 
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+        .header {
+            text-align: center;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
+        .header h1 {
+            font-size: 2rem;
             background: linear-gradient(90deg, #fff, #e94560);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            margin-bottom: 0.5rem;
         }
 
-        .subtitle {
-            font-size: 1.2rem;
+        .header p {
             color: #a2a8d3;
-            margin-bottom: 2rem;
-            line-height: 1.6;
-        }
-
-        .status {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.75rem 1.5rem;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50px;
             font-size: 0.9rem;
-            color: #a2a8d3;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            background: #4ade80;
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .background-shapes {
-            position: fixed;
-            top: 0;
-            left: 0;
+        .chat-container {
+            flex: 1;
+            max-width: 900px;
             width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: -1;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            padding: 1rem;
+            overflow: hidden;
         }
 
-        .shape {
-            position: absolute;
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .message {
+            display: flex;
+            gap: 0.75rem;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
-            opacity: 0.1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
         }
 
-        .shape-1 {
-            width: 400px;
-            height: 400px;
-            background: #e94560;
-            top: -100px;
-            right: -100px;
+        .message.user .message-avatar {
+            background: linear-gradient(135deg, #e94560, #533483);
         }
 
-        .shape-2 {
-            width: 300px;
-            height: 300px;
-            background: #533483;
-            bottom: -50px;
-            left: -50px;
+        .message.ai .message-avatar {
+            background: linear-gradient(135deg, #4ade80, #22c55e);
         }
 
-        .shape-3 {
-            width: 200px;
-            height: 200px;
-            background: #4ade80;
-            top: 50%;
-            left: 10%;
+        .message-content {
+            max-width: 70%;
+            padding: 0.75rem 1rem;
+            border-radius: 1rem;
+            word-wrap: break-word;
         }
 
-        footer {
-            position: fixed;
-            bottom: 2rem;
-            left: 50%;
-            transform: translateX(-50%);
-            color: #a2a8d3;
-            font-size: 0.85rem;
+        .message.user .message-content {
+            background: rgba(233, 69, 96, 0.2);
+            border: 1px solid rgba(233, 69, 96, 0.3);
         }
 
-        footer a {
-            color: #e94560;
-            text-decoration: none;
-            transition: color 0.3s;
+        .message.ai .message-content {
+            background: rgba(74, 222, 128, 0.15);
+            border: 1px solid rgba(74, 222, 128, 0.3);
         }
 
-        footer a:hover {
+        .input-container {
+            display: flex;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem 1rem 0 0;
+        }
+
+        .input-container input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 0.5rem;
             color: #fff;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .input-container input:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: #e94560;
+        }
+
+        .input-container input::placeholder {
+            color: #a2a8d3;
+        }
+
+        .input-container button {
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, #e94560, #533483);
+            border: none;
+            border-radius: 0.5rem;
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .input-container button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(233, 69, 96, 0.4);
+        }
+
+        .input-container button:active {
+            transform: translateY(0);
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 0.5rem 1rem;
+            color: #a2a8d3;
+            font-style: italic;
+        }
+
+        .typing-indicator.active {
+            display: block;
+        }
+
+        .result-highlight {
+            color: #4ade80;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        /* Scrollbar styling */
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: rgba(233, 69, 96, 0.5);
+            border-radius: 3px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: rgba(233, 69, 96, 0.7);
         }
     </style>
 </head>
 <body>
-    <div class="background-shapes">
-        <div class="shape shape-1"></div>
-        <div class="shape shape-2"></div>
-        <div class="shape shape-3"></div>
+    <div class="header">
+        <h1>🤖 egyAI - Matematik Asistanı</h1>
+        <p>Toplama, çıkarma, çarpma, bölme işlemlerini hızlıca çözebilirim</p>
     </div>
 
-    <div class="container">
-        <div class="logo">🚀</div>
-        <h1>Yakında Burada</h1>
-        <p class="subtitle">
-            Yeni bir şeyler üzerinde çalışıyoruz. 
-            Proje detayları netleştikçe bu sayfa güncellenecek.
-        </p>
-        <div class="status">
-            <span class="status-dot"></span>
-            Geliştirme aşamasında
+    <div class="chat-container">
+        <div class="chat-messages" id="chatMessages">
+            <div class="message ai">
+                <div class="message-avatar">🤖</div>
+                <div class="message-content">
+                    Merhaba! Ben egyAI. Matematik işlemlerinizi çözebilirim. Örneğin: "5 + 3", "10 * 4", "20 / 2" gibi sorular sorabilirsiniz.
+                </div>
+            </div>
+        </div>
+        <div class="typing-indicator" id="typingIndicator">AI düşünüyor...</div>
+        <div class="input-container">
+            <input type="text" id="userInput" placeholder="Matematik işlemi yazın (örn: 5 + 3, 10 * 4)..." autocomplete="off">
+            <button id="sendButton">Gönder</button>
         </div>
     </div>
 
-    <footer>
-        Powered by <a href="https://pages.github.com/" target="_blank">GitHub Pages</a>
-    </footer>
+    <script>
+        const chatMessages = document.getElementById('chatMessages');
+        const userInput = document.getElementById('userInput');
+        const sendButton = document.getElementById('sendButton');
+        const typingIndicator = document.getElementById('typingIndicator');
+
+        // Matematik işlemini çöz
+        function solveMath(expression) {
+            try {
+                // Güvenlik için sadece sayılar ve matematik operatörlerine izin ver
+                const cleanExpression = expression
+                    .replace(/[^0-9+\-*/().\s]/g, '')
+                    .trim();
+                
+                if (!cleanExpression) {
+                    return null;
+                }
+
+                // eval kullanarak hesapla (güvenli çünkü temizledik)
+                const result = eval(cleanExpression);
+                
+                // Sonucun geçerli bir sayı olduğunu kontrol et
+                if (typeof result === 'number' && !isNaN(result) && isFinite(result)) {
+                    return result;
+                }
+                return null;
+            } catch (error) {
+                return null;
+            }
+        }
+
+        // Matematik ifadesini tespit et
+        function detectMathExpression(text) {
+            // Türkçe matematik terimlerini de destekle
+            const patterns = [
+                /(\d+)\s*[+\u002B]\s*(\d+)/,  // Toplama: 5 + 3
+                /(\d+)\s*[-−]\s*(\d+)/,        // Çıkarma: 10 - 5
+                /(\d+)\s*[*×x]\s*(\d+)/,       // Çarpma: 5 * 3, 5 × 3, 5x3
+                /(\d+)\s*[/÷]\s*(\d+)/,        // Bölme: 10 / 2, 10 ÷ 2
+                /(\d+)\s*artı\s*(\d+)/i,       // 5 artı 3
+                /(\d+)\s*eksi\s*(\d+)/i,       // 10 eksi 5
+                /(\d+)\s*çarpı\s*(\d+)/i,      // 5 çarpı 3
+                /(\d+)\s*bölü\s*(\d+)/i,       // 10 bölü 2
+            ];
+
+            for (const pattern of patterns) {
+                const match = text.match(pattern);
+                if (match) {
+                    const num1 = parseInt(match[1]);
+                    const num2 = parseInt(match[2]);
+                    
+                    if (pattern.source.includes('artı') || pattern.source.includes('[+\\u002B]')) {
+                        return `${num1} + ${num2}`;
+                    } else if (pattern.source.includes('eksi') || pattern.source.includes('[-−]')) {
+                        return `${num1} - ${num2}`;
+                    } else if (pattern.source.includes('çarpı') || pattern.source.includes('[*×x]')) {
+                        return `${num1} * ${num2}`;
+                    } else if (pattern.source.includes('bölü') || pattern.source.includes('[/÷]')) {
+                        return `${num1} / ${num2}`;
+                    }
+                }
+            }
+
+            // Direkt matematik ifadesi varsa
+            if (/[\d+\-*/().\s]+/.test(text)) {
+                return text.replace(/[^0-9+\-*/().\s]/g, '').trim();
+            }
+
+            return null;
+        }
+
+        // AI cevabı oluştur
+        function generateResponse(userMessage) {
+            const mathExpr = detectMathExpression(userMessage);
+            
+            if (mathExpr) {
+                const result = solveMath(mathExpr);
+                if (result !== null) {
+                    return `Sonuç: <span class="result-highlight">${result}</span><br><small>(${mathExpr} = ${result})</small>`;
+                } else {
+                    return "Üzgünüm, bu matematik işlemini çözemedim. Lütfen geçerli bir işlem yazın (örn: 5 + 3, 10 * 4).";
+                }
+            } else {
+                // Genel cevaplar
+                const lowerMessage = userMessage.toLowerCase();
+                if (lowerMessage.includes('merhaba') || lowerMessage.includes('selam') || lowerMessage.includes('hey')) {
+                    return "Merhaba! Matematik işlemlerinizi çözebilirim. Bir işlem yazın!";
+                } else if (lowerMessage.includes('teşekkür') || lowerMessage.includes('sağol')) {
+                    return "Rica ederim! Başka bir sorunuz var mı?";
+                } else if (lowerMessage.includes('ne yapabilirsin') || lowerMessage.includes('yardım')) {
+                    return "Toplama (+), çıkarma (-), çarpma (*) ve bölme (/) işlemlerini yapabilirim. Örnek: '5 + 3', '10 * 4', '20 / 2'";
+                } else {
+                    return "Matematik işlemlerinizi çözebilirim. Lütfen bir işlem yazın (örn: 5 + 3, 10 * 4).";
+                }
+            }
+        }
+
+        // Mesaj gönder
+        function sendMessage() {
+            const message = userInput.value.trim();
+            if (!message) return;
+
+            // Kullanıcı mesajını ekle
+            addMessage(message, 'user');
+            userInput.value = '';
+
+            // Typing indicator göster
+            typingIndicator.classList.add('active');
+            
+            // Hızlı cevap için kısa bir gecikme (gerçek zamanlı hissi için)
+            setTimeout(() => {
+                typingIndicator.classList.remove('active');
+                const response = generateResponse(message);
+                addMessage(response, 'ai');
+            }, 300); // 300ms gecikme - hızlı cevap
+        }
+
+        // Mesaj ekle
+        function addMessage(content, type) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.textContent = type === 'user' ? '👤' : '🤖';
+            
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            messageContent.innerHTML = content;
+            
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(messageContent);
+            
+            chatMessages.appendChild(messageDiv);
+            
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Event listeners
+        sendButton.addEventListener('click', sendMessage);
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Input'a focus
+        userInput.focus();
+    </script>
 </body>
 </html>
