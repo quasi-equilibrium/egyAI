@@ -237,6 +237,9 @@
         const userInput = document.getElementById('userInput');
         const sendButton = document.getElementById('sendButton');
         const typingIndicator = document.getElementById('typingIndicator');
+        
+        // Konuşma geçmişi (ChatGPT benzeri)
+        let conversationHistory = [];
 
         // Matematik işlemini çöz
         function solveMath(expression) {
@@ -463,6 +466,36 @@
                 "Olimpiyat Oyunları antik Yunanistan'da başladı ve 1896'da modern haliyle yeniden başlatıldı. Her 4 yılda bir düzenlenir. En popüler sporlar futbol, basketbol, tenis, voleybol ve yüzmedir."
             ],
             
+            // Programlama
+            'programlama': [
+                "Programlama, bilgisayarlara talimat verme sanatıdır. En popüler programlama dilleri JavaScript, Python, Java, C++ ve C#'dır. JavaScript web geliştirmede, Python veri bilimi ve yapay zekada yaygın kullanılır.",
+                "HTML web sayfalarının yapısını, CSS görünümünü, JavaScript ise davranışını tanımlar. Modern web geliştirme bu üç teknolojiyi birlikte kullanır."
+            ],
+            
+            // Tarih
+            'tarih': [
+                "Türkiye Cumhuriyeti 29 Ekim 1923'te Mustafa Kemal Atatürk önderliğinde kuruldu. Osmanlı İmparatorluğu 1299'da kuruldu ve 1922'ye kadar sürdü.",
+                "İstanbul 1453'te Fatih Sultan Mehmet tarafından fethedildi. Bu olay Orta Çağ'ın sonu ve Yeni Çağ'ın başlangıcı kabul edilir."
+            ],
+            
+            // Coğrafya
+            'coğrafya': [
+                "Türkiye Asya ve Avrupa kıtalarında yer alan bir ülkedir. Başkenti Ankara, en büyük şehri İstanbul'dur. Türkiye'nin nüfusu yaklaşık 85 milyondur.",
+                "İstanbul Boğazı Asya ve Avrupa'yı ayırır. Türkiye'nin en yüksek dağı Ağrı Dağı'dır (5,137 metre)."
+            ],
+            
+            // Edebiyat
+            'edebiyat': [
+                "Türk edebiyatının önemli yazarları arasında Nazım Hikmet, Yaşar Kemal, Orhan Pamuk, Elif Şafak bulunur. Türk edebiyatı zengin bir şiir geleneğine sahiptir.",
+                "Dünya edebiyatının önemli eserleri arasında Don Kişot, Savaş ve Barış, Suç ve Ceza bulunur. Edebiyat insanlığın kültürel mirasının önemli bir parçasıdır."
+            ],
+            
+            // Müzik
+            'müzik': [
+                "Müzik evrensel bir dildir. Klasik müzik, pop, rock, jazz, elektronik müzik gibi birçok tür vardır. Müzik ruh halini etkiler ve terapötik etkileri vardır.",
+                "Türk müziği zengin bir geleneğe sahiptir. Klasik Türk müziği, halk müziği ve modern pop müzik Türkiye'de yaygındır."
+            ],
+            
             // Genel bilgiler
             'rastgele': [
                 "İlginç bir bilgi: Bal arıları saniyede 200 kez kanat çırpar! Bir arı kolonisi günde 2-3 kg bal üretebilir.",
@@ -489,8 +522,13 @@
                 'kahve': ['kahve', 'türk kahvesi', 'espresso'],
                 'futbol': ['futbol', 'futbol', 'gol', 'maç', 'takım', 'futbolcu'],
                 'basketbol': ['basketbol', 'basket', 'nba', 'basketbolcu'],
-                'spor': ['spor', 'egzersiz', 'antrenman', 'fitness', 'atletizm'],
-                'hayvan': ['hayvan', 'hayvanlar', 'canlı', 'fauna']
+                'spor': ['spor', 'egzersiz', 'antrenman', 'fitness', 'atletizm', 'koşu', 'yüzme', 'tenis'],
+                'hayvan': ['hayvan', 'hayvanlar', 'canlı', 'fauna', 'kuş', 'balık', 'aslan', 'kaplan'],
+                'programlama': ['kod', 'programlama', 'yazılım', 'javascript', 'python', 'html', 'css'],
+                'tarih': ['tarih', 'osmanlı', 'türkiye', 'atatürk', 'savaş'],
+                'coğrafya': ['ülke', 'şehir', 'istanbul', 'ankara', 'izmir', 'türkiye'],
+                'edebiyat': ['kitap', 'roman', 'şiir', 'yazar', 'edebiyat'],
+                'müzik': ['müzik', 'şarkı', 'sanatçı', 'albüm', 'enstrüman']
             };
 
             for (const [topic, keywords] of Object.entries(topics)) {
@@ -501,8 +539,78 @@
             return null;
         }
 
+        // AI API ile cevap al - Cohere veya alternatif
+        async function getAIResponse(userMessage) {
+            try {
+                // Önce basit bir text completion API dene
+                // Not: Gerçek bir AI API'si için backend gerekebilir (CORS sorunları)
+                // Şimdilik gelişmiş pattern matching kullanacağız
+                return null;
+            } catch (error) {
+                console.error('AI API hatası:', error);
+                return null;
+            }
+        }
+        
+        // Gelişmiş akıllı cevap üretme - ChatGPT benzeri
+        function generateSmartResponse(userMessage) {
+            const lower = userMessage.toLowerCase();
+            
+            // Çok daha geniş pattern matching ve akıllı cevaplar
+            // Her türlü soruya mantıklı cevap verme
+            
+            // Soru türleri
+            if (lower.includes('nedir') || lower.includes('ne demek')) {
+                const topic = detectTopic(userMessage);
+                if (topic && knowledgeBase[topic]) {
+                    return knowledgeBase[topic][0];
+                }
+                return "Bu konuda size yardımcı olmak isterim. Biraz daha detay verebilir misiniz? Hangi konuda bilgi almak istersiniz?";
+            }
+            
+            if (lower.includes('nasıl') && !lower.includes('nasılsın')) {
+                return "Size yardımcı olmak için daha spesifik bir soru sorabilir misiniz? Hangi konuda 'nasıl' sorusu soruyorsunuz? Adım adım açıklayabilirim.";
+            }
+            
+            if (lower.includes('neden')) {
+                return "Bu ilginç bir soru! Her şeyin bir nedeni vardır. Size daha iyi yardımcı olabilmem için hangi konuda 'neden' sorusu soruyorsunuz?";
+            }
+            
+            if (lower.includes('kim')) {
+                return "Bu konuda size yardımcı olmak isterim. Hangi kişi hakkında bilgi almak istersiniz?";
+            }
+            
+            if (lower.includes('nerede')) {
+                return "Bu konuda size yardımcı olmak isterim. Hangi yer hakkında bilgi almak istersiniz?";
+            }
+            
+            // Genel konuşma - daha doğal ve akıllı
+            if (lower.length > 5) {
+                const topic = detectTopic(userMessage);
+                if (topic && knowledgeBase[topic]) {
+                    return knowledgeBase[topic][Math.floor(Math.random() * knowledgeBase[topic].length)];
+                }
+                
+                // Konuşma geçmişine bak
+                if (conversationHistory.length > 0) {
+                    const lastMessage = conversationHistory[conversationHistory.length - 1];
+                    if (lastMessage.role === 'user') {
+                        // Önceki mesaja bağlı cevap
+                        if (lastMessage.content.toLowerCase().includes('nasılsın')) {
+                            return "Teşekkür ederim! Size nasıl yardımcı olabilirim?";
+                        }
+                    }
+                }
+                
+                // Genel akıllı cevap - ChatGPT benzeri
+                return "Anladım. Bu konuda size yardımcı olmak isterim. Biraz daha detay verebilir misiniz? Size yardımcı olabileceğim konular: matematik, teknoloji, bilim, hayvanlar, yemek, spor ve genel sohbet. Hangi konuda bilgi almak istersiniz?";
+            }
+            
+            return null;
+        }
+
         // Genel AI cevabı oluştur
-        function generateResponse(userMessage) {
+        async function generateResponse(userMessage) {
             const lowerMessage = userMessage.toLowerCase().trim();
             const normalized = normalizeMessage(userMessage);
             
@@ -811,28 +919,56 @@ function touchStarted() {
                 return randomFacts[Math.floor(Math.random() * randomFacts.length)];
             }
 
-            // Varsayılan - bilinmeyen konular için dürüst cevap (uydurma yok)
-            return "Bu konuda kesin bilgim yok. Size yardımcı olabileceğim konular: matematik işlemleri, teknoloji (bilgisayar, telefon, internet), bilim (uzay, dünya), hayvanlar (kedi, köpek), yemek, spor (futbol, basketbol) ve genel sohbet. Başka bir soru sorabilir misiniz?";
+            // Gelişmiş akıllı cevap üretme
+            const smartResponse = generateSmartResponse(userMessage);
+            if (smartResponse) {
+                return smartResponse;
+            }
+            
+            // AI API'den cevap almayı dene (gelecekte backend ile)
+            const aiResponse = await getAIResponse(userMessage);
+            if (aiResponse) {
+                return aiResponse;
+            }
+            
+            // Son çare - bilgi tabanından rastgele bilgi
+            const randomFacts = knowledgeBase['rastgele'];
+            return randomFacts[Math.floor(Math.random() * randomFacts.length)] + " Başka bir sorunuz var mı?";
         }
 
         // Mesaj gönder
-        function sendMessage() {
+        async function sendMessage() {
             const message = userInput.value.trim();
             if (!message) return;
 
             // Kullanıcı mesajını ekle
             addMessage(message, 'user');
+            
+            // Konuşma geçmişine ekle
+            conversationHistory.push({ role: 'user', content: message });
+            
             userInput.value = '';
 
             // Typing indicator göster
             typingIndicator.classList.add('active');
             
-            // Hızlı cevap için kısa bir gecikme
-            setTimeout(() => {
+            try {
+                // AI'dan cevap al
+                const response = await generateResponse(message);
                 typingIndicator.classList.remove('active');
-                const response = generateResponse(message);
                 addMessage(response, 'ai');
-            }, 400); // 400ms - doğal hissiyat için
+                
+                // AI cevabını geçmişe ekle
+                conversationHistory.push({ role: 'assistant', content: response });
+                
+                // Geçmişi sınırla (son 10 mesaj)
+                if (conversationHistory.length > 10) {
+                    conversationHistory = conversationHistory.slice(-10);
+                }
+            } catch (error) {
+                typingIndicator.classList.remove('active');
+                addMessage("Üzgünüm, bir hata oluştu. Lütfen tekrar deneyin.", 'ai');
+            }
         }
 
         // Mesaj ekle
