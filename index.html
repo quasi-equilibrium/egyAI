@@ -619,6 +619,21 @@
                 return "Egemen kişisi bu yapay zekanın yapımcısındır ve 13 yaşındandır.";
             }
             
+            // Görsel oluşturma kontrolü
+            if (smartMatch(userMessage, ['görsel oluştur', 'resim yap', 'görsel yap', 'resim oluştur', 'ai görsel', 'görsel üret', 'resim üret'])) {
+                return "Evet, AI görsel oluşturabilir! Size görsel oluşturmak için birkaç seçenek sunabilirim:<br><br>1. <a href='https://arting.ai/tr/ai-app' target='_blank' style='color: #4ade80; text-decoration: underline;'>Arting.ai</a> - Ücretsiz AI görsel oluşturma<br>2. <a href='https://bylo.ai/tr/text-to-image' target='_blank' style='color: #4ade80; text-decoration: underline;'>Bylo.ai</a> - Yüksek kaliteli görseller<br>3. <a href='https://www.kapwing.com/tr/ai/image-generator' target='_blank' style='color: #4ade80; text-decoration: underline;'>Kapwing</a> - Fotogerçekçi görseller<br><br>Hangi tür bir görsel oluşturmak istersiniz? Bana açıklayın, size en uygun aracı önerebilirim.";
+            }
+            
+            // Görsel oluşturma isteği - detaylı
+            if (lowerMessage.includes('görsel') && (lowerMessage.includes('yap') || lowerMessage.includes('oluştur') || lowerMessage.includes('üret'))) {
+                // Kullanıcının ne istediğini anlamaya çalış
+                const imagePrompt = userMessage.replace(/görsel|resim|yap|oluştur|üret/gi, '').trim();
+                if (imagePrompt.length > 3) {
+                    return `Anladım! "${imagePrompt}" konulu bir görsel oluşturmak istiyorsunuz. Size şu araçları öneririm:<br><br>• <a href='https://arting.ai/tr/ai-app' target='_blank' style='color: #4ade80; text-decoration: underline;'>Arting.ai</a> - Ücretsiz ve kolay kullanım<br>• <a href='https://bylo.ai/tr/text-to-image' target='_blank' style='color: #4ade80; text-decoration: underline;'>Bylo.ai</a> - Yüksek kalite<br><br>Bu sitelere gidip "${imagePrompt}" yazarsanız, AI size görsel oluşturur!`;
+                }
+                return "Hangi tür bir görsel oluşturmak istersiniz? Bana açıklayın, size yardımcı olabilirim.";
+            }
+            
             // Oyun yapma kontrolü
             if (smartMatch(userMessage, ['oyun yap', 'oyun yapabilir misin', 'oyun kodla', 'oyun oluştur', 'bana oyun yap'])) {
                 return "Tabii ki! Oyun yapmak için <a href='https://editor.p5js.org/' target='_blank' style='color: #4ade80; text-decoration: underline;'>https://editor.p5js.org/</a> sitesini kullanabilirsiniz. Ne tür bir oyun istiyorsunuz?";
@@ -878,7 +893,12 @@ function touchStarted() {
 
             // Ne yapabilirsin
             if (smartMatch(userMessage, ['ne yapabilirsin', 'yapabilir misin', 'yardım', 'ne işe yararsın', 'ne yapabilir'])) {
-                return "Size birçok konuda yardımcı olabilirim! Matematik işlemleri yapabilirim, teknoloji, bilim, spor, yemek gibi konularda bilgi verebilirim, sohbet edebilirim. Hangi konuda bilgi almak istersiniz?";
+                return "Size birçok konuda yardımcı olabilirim! Matematik işlemleri yapabilirim, teknoloji, bilim, spor, yemek gibi konularda bilgi verebilirim, sohbet edebilirim, oyun kodları verebilirim ve AI görsel oluşturma araçları önerebilirim. Hangi konuda bilgi almak istersiniz?";
+            }
+            
+            // AI görsel oluşturabilir misin sorusu
+            if (smartMatch(userMessage, ['ai görsel oluşturabilir mi', 'görsel oluşturabilir misin', 'resim yapabilir misin', 'görsel yapabilir misin'])) {
+                return "Evet, AI görsel oluşturabilir! Ben doğrudan görsel oluşturmam ama size ücretsiz AI görsel oluşturma araçları önerebilirim. 'Görsel oluştur' veya 'resim yap' dediğinizde size en iyi araçları gösterebilirim. Hangi tür bir görsel oluşturmak istersiniz?";
             }
 
             // Soru sorma - kesin bilgiler
