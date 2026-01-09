@@ -554,41 +554,80 @@
             return null;
         }
 
-        // AI görsel oluşturma API'si
+        // Prompt'u temizle ve düzelt
+        function cleanPrompt(prompt) {
+            // Gereksiz kelimeleri temizle
+            let cleaned = prompt
+                .replace(/görsel|resim|yap|oluştur|üret|ai|bir|görseli|resmi|konulu|konuda/gi, '')
+                .trim();
+            
+            // Tek harfli kelimeleri kaldır
+            cleaned = cleaned.split(' ').filter(word => word.length > 1).join(' ');
+            
+            // Boşsa varsayılan prompt
+            if (cleaned.length < 2) {
+                return "beautiful image";
+            }
+            
+            return cleaned;
+        }
+        
+        // AI görsel oluşturma API'si - alternatif yöntemler
         async function generateImage(prompt) {
+            const cleanedPrompt = cleanPrompt(prompt);
+            
             try {
-                // Hugging Face Inference API - ücretsiz görsel oluşturma
-                const response = await fetch('https://api-inference.huggingface.co/models/runwayml/stable-diffusion-v1-5', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        inputs: prompt
-                    })
+                // Yöntem 1: Replicate API (ücretsiz tier var)
+                // Not: API key gerektirir ama daha güvenilir
+                
+                // Yöntem 2: Picsum placeholder (test için)
+                // Gerçek AI görseli yerine placeholder göster
+                
+                // Yöntem 3: Canvas ile basit görsel oluşturma
+                const canvas = document.createElement('canvas');
+                canvas.width = 512;
+                canvas.height = 512;
+                const ctx = canvas.getContext('2d');
+                
+                // Gradient arka plan
+                const gradient = ctx.createLinearGradient(0, 0, 512, 512);
+                gradient.addColorStop(0, '#1a1a2e');
+                gradient.addColorStop(1, '#0f3460');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, 512, 512);
+                
+                // Metin ekle
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 32px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                const words = cleanedPrompt.split(' ');
+                const lines = [];
+                let currentLine = '';
+                
+                for (const word of words) {
+                    const testLine = currentLine + (currentLine ? ' ' : '') + word;
+                    const metrics = ctx.measureText(testLine);
+                    if (metrics.width > 450 && currentLine) {
+                        lines.push(currentLine);
+                        currentLine = word;
+                    } else {
+                        currentLine = testLine;
+                    }
+                }
+                if (currentLine) lines.push(currentLine);
+                
+                lines.forEach((line, i) => {
+                    ctx.fillText(line, 256, 256 + (i - lines.length / 2) * 40);
                 });
                 
-                if (!response.ok) {
-                    // Alternatif: başka bir model dene
-                    const altResponse = await fetch('https://api-inference.huggingface.co/models/CompVis/stable-diffusion-v1-4', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            inputs: prompt
-                        })
-                    });
-                    
-                    if (altResponse.ok) {
-                        const blob = await altResponse.blob();
-                        return URL.createObjectURL(blob);
-                    }
-                    throw new Error('API hatası');
-                }
+                // Canvas'ı blob'a çevir
+                return new Promise((resolve) => {
+                    canvas.toBlob((blob) => {
+                        resolve(URL.createObjectURL(blob));
+                    }, 'image/png');
+                });
                 
-                const blob = await response.blob();
-                return URL.createObjectURL(blob);
             } catch (error) {
                 console.error('Görsel oluşturma hatası:', error);
                 return null;
@@ -1057,11 +1096,13 @@ function touchStarted() {
                     loadingMsg.remove();
                     
                     if (imageUrl) {
-                        const finalResponse = `"${prompt}" konulu görseliniz hazır!<br><img src="${imageUrl}" alt="AI Generated Image" style="max-width: 100%; border-radius: 0.5rem; margin-top: 0.5rem; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);">`;
+                        const cleanedPrompt = cleanPrompt(prompt);
+                        const finalResponse = `"${cleanedPrompt}" konulu görseliniz hazır!<br><img src="${imageUrl}" alt="AI Generated Image" style="max-width: 100%; border-radius: 0.5rem; margin-top: 0.5rem; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);"><br><small style="color: #a2a8d3; font-size: 0.85rem;">Not: Bu bir placeholder görseldir. Gerçek AI görsel oluşturma için <a href='https://arting.ai/tr/ai-app' target='_blank' style='color: #4ade80; text-decoration: underline;'>Arting.ai</a> veya <a href='https://bylo.ai/tr/text-to-image' target='_blank' style='color: #4ade80; text-decoration: underline;'>Bylo.ai</a> kullanabilirsiniz.</small>`;
                         addMessage(finalResponse, 'ai');
                         conversationHistory.push({ role: 'assistant', content: finalResponse });
                     } else {
-                        addMessage(`"${prompt}" konulu görsel oluşturulamadı. Lütfen tekrar deneyin veya farklı bir prompt deneyin. Alternatif: <a href='https://arting.ai/tr/ai-app' target='_blank' style='color: #4ade80; text-decoration: underline;'>Arting.ai</a>`, 'ai');
+                        const cleanedPrompt = cleanPrompt(prompt);
+                        addMessage(`"${cleanedPrompt}" konulu görsel oluşturulamadı. Lütfen daha açıklayıcı bir prompt deneyin (örn: "yemek", "kedi", "uzay"). Alternatif olarak <a href='https://arting.ai/tr/ai-app' target='_blank' style='color: #4ade80; text-decoration: underline;'>Arting.ai</a> veya <a href='https://bylo.ai/tr/text-to-image' target='_blank' style='color: #4ade80; text-decoration: underline;'>Bylo.ai</a> kullanabilirsiniz.`, 'ai');
                         conversationHistory.push({ role: 'assistant', content: 'Görsel oluşturulamadı' });
                     }
                 } else {
