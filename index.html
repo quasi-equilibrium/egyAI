@@ -298,9 +298,112 @@
             return null;
         }
 
+        // Yazım hatası toleransı - benzer kelimeleri bul
+        function findSimilarWord(word, dictionary) {
+            word = word.toLowerCase();
+            
+            // Tam eşleşme
+            if (dictionary.includes(word)) {
+                return word;
+            }
+            
+            // Yazım hatası varyasyonları
+            const variations = {
+                'hastayım': ['hasrtayım', 'hastayim', 'hastaym', 'hastayim', 'hastayım', 'hastayim'],
+                'hastayım': ['hasrtayım', 'hastayim', 'hastaym'],
+                'iyiyim': ['iyiym', 'iyiyim', 'iyiim', 'iyyim'],
+                'kötüyüm': ['kötüym', 'kötüyüm', 'kötüyum', 'kötüym'],
+                'merhaba': ['merhab', 'merha', 'merhabaa'],
+                'selam': ['selamm', 'selamun', 'selamun aleyküm'],
+                'teşekkür': ['teşekkürler', 'teşekkür ederim', 'tesekkur', 'tesekkurler'],
+                'sağol': ['sağ ol', 'saol', 'sağolun'],
+                'günaydın': ['gunaydin', 'günaydın', 'gunaydın'],
+                'nasılsın': ['nasilsin', 'nasılsın', 'nasılsın'],
+                'hava': ['havalar', 'havalar nasıl', 'hava durumu'],
+                'iyi': ['iyi', 'iyiyim', 'iyi gidiyor'],
+                'kötü': ['kötü', 'kötüyüm', 'kötü gidiyor'],
+                'üzgün': ['uzgun', 'üzgünüm', 'uzgunum'],
+                'görüşürüz': ['görüşürüz', 'görüşmek üzere', 'görüşürüz'],
+                'hoşça kal': ['hoşça kal', 'hoşçakal', 'hosca kal']
+            };
+            
+            // Varyasyonları kontrol et
+            for (const [correct, variants] of Object.entries(variations)) {
+                if (variants.includes(word) || word.includes(correct) || correct.includes(word)) {
+                    return correct;
+                }
+            }
+            
+            // Levenshtein distance benzeri basit kontrol
+            for (const dictWord of dictionary) {
+                if (word.length >= 3 && dictWord.length >= 3) {
+                    // İlk ve son harfler aynıysa ve uzunluk benzeriyse
+                    if (word[0] === dictWord[0] && 
+                        Math.abs(word.length - dictWord.length) <= 2 &&
+                        (word.includes(dictWord.substring(0, 3)) || dictWord.includes(word.substring(0, 3)))) {
+                        return dictWord;
+                    }
+                }
+            }
+            
+            return word;
+        }
+
+        // Mesajı normalize et - yazım hatalarını düzelt
+        function normalizeMessage(message) {
+            const lowerMessage = message.toLowerCase().trim();
+            const words = lowerMessage.split(/\s+/);
+            
+            // Yaygın kelimeler sözlüğü
+            const commonWords = [
+                'hastayım', 'iyiyim', 'kötüyüm', 'merhaba', 'selam', 'teşekkür', 
+                'sağol', 'günaydın', 'nasılsın', 'hava', 'iyi', 'kötü', 'üzgün',
+                'görüşürüz', 'hoşça kal', 'nasıl', 'neden', 'ne', 'kim', 'nerede',
+                'yardım', 'yapabilir', 'yapabilirsin', 'teşekkürler', 'sağolun'
+            ];
+            
+            // Her kelimeyi kontrol et ve düzelt
+            const normalizedWords = words.map(word => {
+                // Noktalama işaretlerini temizle
+                const cleanWord = word.replace(/[.,!?;:]/g, '');
+                return findSimilarWord(cleanWord, commonWords);
+            });
+            
+            return normalizedWords.join(' ');
+        }
+
+        // Akıllı kelime eşleştirme - yazım hatası toleranslı
+        function smartMatch(text, patterns) {
+            const normalized = normalizeMessage(text);
+            const lowerText = text.toLowerCase();
+            const lowerNormalized = normalized.toLowerCase();
+            
+            for (const pattern of patterns) {
+                if (typeof pattern === 'string') {
+                    // Basit string eşleştirme
+                    if (lowerText.includes(pattern) || lowerNormalized.includes(pattern)) {
+                        return true;
+                    }
+                } else if (pattern instanceof RegExp) {
+                    // Regex eşleştirme
+                    if (pattern.test(lowerText) || pattern.test(lowerNormalized)) {
+                        return true;
+                    }
+                } else if (Array.isArray(pattern)) {
+                    // Array of patterns - herhangi biri eşleşirse
+                    if (pattern.some(p => smartMatch(text, [p]))) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
         // Genel AI cevabı oluştur
         function generateResponse(userMessage) {
             const lowerMessage = userMessage.toLowerCase().trim();
+            const normalized = normalizeMessage(userMessage);
+            const lowerNormalized = normalized.toLowerCase();
             
             // Önce matematik kontrolü
             const mathExpr = detectMathExpression(userMessage);
@@ -311,8 +414,13 @@
                 }
             }
 
+            // Hastayım / Sağlık durumu
+            if (smartMatch(userMessage, ['hastayım', 'hastayim', 'hasrtayım', 'hastaym', 'hasta', 'hastalandım', 'rahatsızım'])) {
+                return "Geçmiş olsun! Umarım yakında iyileşirsiniz. Size nasıl yardımcı olabilirim? İlaç kullanıyorsanız doktorunuzun tavsiyelerine uymayı unutmayın.";
+            }
+
             // Selamlaşma
-            if (lowerMessage.includes('merhaba') || lowerMessage.includes('selam') || lowerMessage.includes('hey') || lowerMessage.includes('günaydın') || lowerMessage.includes('iyi günler')) {
+            if (smartMatch(userMessage, ['merhaba', 'selam', 'hey', 'günaydın', 'iyi günler', 'selamun aleyküm'])) {
                 const greetings = [
                     "Merhaba! Size nasıl yardımcı olabilirim?",
                     "Selam! Ne hakkında konuşmak istersiniz?",
@@ -323,7 +431,7 @@
             }
 
             // Havalar hakkında
-            if (lowerMessage.includes('hava') || lowerMessage.includes('havalar') || lowerMessage.includes('hava durumu') || lowerMessage.includes('hava nasıl')) {
+            if (smartMatch(userMessage, ['hava', 'havalar', 'hava durumu', 'hava nasıl', 'havalar nasıl'])) {
                 const weatherResponses = [
                     "Maalesef gerçek zamanlı hava durumu bilgisine erişimim yok, ancak dışarı çıkacaksanız hava durumunu kontrol etmenizi öneririm. Size nasıl başka bir konuda yardımcı olabilirim?",
                     "Hava durumu bilgisi için bir hava durumu uygulamasına bakmanızı öneririm. Başka bir sorunuz var mı?",
@@ -333,30 +441,29 @@
             }
 
             // Nasılsın
-            if (lowerMessage.includes('nasılsın') || lowerMessage.includes('nasıl gidiyor') || lowerMessage.includes('ne haber')) {
+            if (smartMatch(userMessage, ['nasılsın', 'nasıl gidiyor', 'ne haber', 'nasilsin', 'nasılsın'])) {
                 return "Teşekkür ederim, iyiyim! Size nasıl yardımcı olabilirim?";
             }
 
             // Teşekkür
-            if (lowerMessage.includes('teşekkür') || lowerMessage.includes('sağol') || lowerMessage.includes('sağ ol') || lowerMessage.includes('eyvallah')) {
+            if (smartMatch(userMessage, ['teşekkür', 'sağol', 'sağ ol', 'eyvallah', 'tesekkur', 'tesekkurler', 'sağolun'])) {
                 return "Rica ederim! Başka bir konuda yardımcı olabilir miyim?";
             }
 
             // Ne yapabilirsin
-            if (lowerMessage.includes('ne yapabilirsin') || lowerMessage.includes('yapabilir misin') || lowerMessage.includes('yardım') || lowerMessage.includes('ne işe yararsın')) {
+            if (smartMatch(userMessage, ['ne yapabilirsin', 'yapabilir misin', 'yardım', 'ne işe yararsın', 'ne yapabilir'])) {
                 return "Size çeşitli konularda yardımcı olabilirim! Matematik işlemleri yapabilirim, sorularınızı cevaplayabilirim, sohbet edebilirim. Ne hakkında konuşmak istersiniz?";
             }
 
             // Soru sorma (ne, nasıl, neden, kim, nerede)
-            if (lowerMessage.includes('ne ') || lowerMessage.includes('nasıl ') || lowerMessage.includes('neden ') || lowerMessage.includes('kim ') || lowerMessage.includes('nerede ')) {
-                // Genel bilgi soruları için akıllı cevaplar
-                if (lowerMessage.includes('ne zaman')) {
+            if (smartMatch(userMessage, ['ne ', 'nasıl ', 'neden ', 'kim ', 'nerede '])) {
+                if (smartMatch(userMessage, ['ne zaman'])) {
                     return "Zaman hakkında sorular için takvime bakmanızı öneririm. Başka bir sorunuz var mı?";
                 }
-                if (lowerMessage.includes('nasıl yapılır') || lowerMessage.includes('nasıl yapabilirim')) {
+                if (smartMatch(userMessage, ['nasıl yapılır', 'nasıl yapabilirim'])) {
                     return "Size yardımcı olmak için daha spesifik bir soru sorabilir misiniz? Hangi konuda yardıma ihtiyacınız var?";
                 }
-                if (lowerMessage.includes('neden')) {
+                if (smartMatch(userMessage, ['neden'])) {
                     return "Bu ilginç bir soru! Daha fazla detay verirseniz size daha iyi yardımcı olabilirim.";
                 }
                 return "Bu konuda size yardımcı olmak isterim. Biraz daha detay verebilir misiniz?";
@@ -368,16 +475,16 @@
             }
 
             // Genel sohbet - akıllı cevaplar
-            if (lowerMessage.includes('iyi') || lowerMessage.includes('güzel') || lowerMessage.includes('harika')) {
+            if (smartMatch(userMessage, ['iyi', 'güzel', 'harika', 'iyiyim', 'iyi gidiyor'])) {
                 return "Harika! Başka bir konuda yardımcı olabilir miyim?";
             }
 
-            if (lowerMessage.includes('kötü') || lowerMessage.includes('kötüyüm') || lowerMessage.includes('üzgün')) {
+            if (smartMatch(userMessage, ['kötü', 'kötüyüm', 'üzgün', 'kötüyüm', 'uzgun', 'kötü gidiyor'])) {
                 return "Üzgünüm bunu duyduğuma. Size nasıl yardımcı olabilirim? Belki başka bir konuda konuşmak ister misiniz?";
             }
 
             // Veda
-            if (lowerMessage.includes('görüşürüz') || lowerMessage.includes('hoşça kal') || lowerMessage.includes('bye') || lowerMessage.includes('güle güle')) {
+            if (smartMatch(userMessage, ['görüşürüz', 'hoşça kal', 'bye', 'güle güle', 'hosca kal'])) {
                 return "Görüşmek üzere! İyi günler dilerim!";
             }
 
